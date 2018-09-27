@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"    
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+    xmlns:p="http://www.springframework.org/schema/p"  
+    xmlns:aop="http://www.springframework.org/schema/aop"   
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:jee="http://www.springframework.org/schema/jee"  
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xsi:schemaLocation="    
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd  
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd  
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="www.springframework.org/schema/security" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+    http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"> -->
+         
+	<context:component-scan base-package="com.pgd.test">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	<!-- 配置数据源 1 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+
+		<property name="driverClass">
+			<value>com.mysql.jdbc.Driver</value>
+		</property>
+
+		<property name="jdbcUrl">
+			<value>jdbc:mysql://localhost:3306/spmhbe?rewriteBatchedStatements=true</value>
+		</property>
+		<property name="user">
+			<value>root</value>
+		</property>
+		<property name="password">
+			<value>root</value>
+		</property>
+		<!-- 连接池中保留的最小链接数量 -->
+		<property name="minPoolSize" value="10" />
+		<!-- 连接池中保留的最大链接数量 default：15 -->
+		<property name="maxPoolSize" value="100" />
+		<!-- 最大空闲时间，1800秒内未使用则连接被丢弃。若为0则永不丢弃。default：0 -->
+		<property name="maxIdleTime" value="1800" />
+		<!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。default：3 -->
+		<property name="acquireIncrement" value="5" />
+		<property name="maxStatements" value="1000" />
+		<property name="initialPoolSize" value="10" />
+		<!-- 每60秒交叉所有连接池中的空闲连接。default：0 -->
+		<property name="idleConnectionTestPeriod" value="60" />
+		<!-- 定义在从数据库获取新连接失败后重复尝试的次数 default：30 -->
+		<property name="acquireRetryAttempts" value="30" />
+		<property name="breakAfterAcquireFailure" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+	</bean>
+	<!-- 配置SessionFactory对应数据源1：dataSource1 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="com.pgd.test" />
+		<property name="hibernateProperties">
+			<value>
+				 hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
+				 hibernate.connection.autocommit = false
+				 hibernate.hbm2ddl.auto = update 
+				 hibernate.show_sql = false 
+				 hibernate.format_sql =false 
+				 hibernate.jdbc_batch_size = 250 
+				 hibernate.cache.use_second_level_cache = true 
+				 hibernate.cache.use_query_cacroxyhe = false 
+				 hibernate.current_session_context_class = org.springframework.orm.hibernate4.SpringSessionContext
+				 
+			</value>
+		</property>
+	</bean>
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="14680064"></property><!-- 上传文件最大值，单位byte -->
+		<property name="defaultEncoding" value="utf-8"></property>
+	</bean>
+
+	<!-- 事物1 start -->
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="nestedTransactionAllowed" value="true" />
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager"
+		proxy-target-class="true" mode="proxy"></tx:annotation-driven>
+	<!-- 事物1 end -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+</beans>  
